@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Electricity Meter Scanner</title>
   <style>
     body {
@@ -14,12 +14,10 @@
       align-items: center;
       padding: 20px;
     }
-
     h1 {
       color: #2e7d32;
       margin-bottom: 20px;
     }
-
     .btn {
       padding: 14px 25px;
       background-color: #43a047;
@@ -31,12 +29,10 @@
       margin: 10px;
       transition: background-color 0.3s, transform 0.2s;
     }
-
     .btn:hover {
       background-color: #2e7d32;
       transform: scale(1.05);
     }
-
     .camera-container {
       display: none;
       margin-top: 20px;
@@ -44,67 +40,79 @@
       border-radius: 15px;
       overflow: hidden;
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
     }
-
     video {
       width: 100%;
-      max-width: 400px;
+      height: auto;
+      display: block;
+      border-radius: 10px;
     }
-
+    #captureBtn {
+      display: none;
+      margin-top: 10px;
+    }
     canvas {
       margin-top: 20px;
       border: 2px solid #999;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      display: none;
     }
   </style>
 </head>
 <body>
 
   <h1>Electricity Bill Scanner</h1>
-  <button class="btn" onclick="startCamera()">📷 Open Back Camera</button>
+  <button class="btn" id="startBtn">📷 Open Back Camera</button>
 
   <div class="camera-container" id="cameraContainer">
     <video id="video" autoplay playsinline></video>
-    <button class="btn" onclick="captureImage()">📸 Capture Image</button>
+    <button class="btn" id="captureBtn">📸 Capture Image</button>
   </div>
 
-  <canvas id="snapshot" width="400" height="300" style="display: none;"></canvas>
+  <canvas id="snapshot" width="400" height="300"></canvas>
 
   <script>
+    const startBtn = document.getElementById('startBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const video = document.getElementById('video');
+    const cameraContainer = document.getElementById('cameraContainer');
+    const canvas = document.getElementById('snapshot');
+    const ctx = canvas.getContext('2d');
     let videoStream;
 
-    async function startCamera() {
-      const video = document.getElementById('video');
-      const container = document.getElementById('cameraContainer');
+    startBtn.addEventListener('click', async () => {
+      cameraContainer.style.display = 'block';
+      captureBtn.style.display = 'none';  // Hide capture button initially
 
       try {
-        const constraints = {
-          video: {
-            facingMode: { exact: "environment" } // back camera
-          }
-        };
-
-        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = videoStream;
-        container.style.display = 'block';
-      } catch (err) {
-        alert("Back camera not available or permission denied. Using default camera.");
-        const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = fallbackStream;
-        videoStream = fallbackStream;
-        container.style.display = 'block';
+        // Try to open back camera
+        videoStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" }
+        });
+      } catch (e) {
+        console.warn('Back camera not found, using default camera.', e);
+        // fallback to any camera
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
       }
-    }
 
-    function captureImage() {
-      const canvas = document.getElementById('snapshot');
-      const video = document.getElementById('video');
-      const context = canvas.getContext('2d');
-      
+      video.srcObject = videoStream;
+
+      // Show capture button only after stream starts
+      video.onloadedmetadata = () => {
+        captureBtn.style.display = 'inline-block';
+      };
+    });
+
+    captureBtn.addEventListener('click', () => {
       canvas.style.display = 'block';
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    });
   </script>
 
 </body>
