@@ -16,7 +16,7 @@
     }
     h1 {
       color: #2e7d32;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
     .btn {
       padding: 14px 25px;
@@ -34,7 +34,6 @@
       transform: scale(1.05);
     }
     .camera-container {
-      display: none;
       margin-top: 20px;
       border: 4px solid #2e7d32;
       border-radius: 15px;
@@ -43,75 +42,65 @@
       max-width: 400px;
       width: 100%;
       text-align: center;
+      padding: 10px;
+      background: white;
     }
-    video {
+    video, canvas {
       width: 100%;
-      height: auto;
-      display: block;
       border-radius: 10px;
-    }
-    #captureBtn {
       display: none;
-      margin-top: 10px;
     }
-    canvas {
+    .info-text {
+      color: #888;
       margin-top: 20px;
-      border: 2px solid #999;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 100%;
-      display: none;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
 
   <h1>Electricity Bill Scanner</h1>
-  <button class="btn" id="startBtn">📷 Open Back Camera</button>
 
   <div class="camera-container" id="cameraContainer">
+    <div id="infoText" class="info-text">
+      Click the button below to open the camera and upload an image.
+    </div>
     <video id="video" autoplay playsinline></video>
-    <button class="btn" id="captureBtn">📸 Capture Image</button>
+    <canvas id="snapshot" width="400" height="300"></canvas>
   </div>
 
-  <canvas id="snapshot" width="400" height="300"></canvas>
+  <button class="btn" id="openCameraBtn">📷 Open Camera</button>
+  <button class="btn" id="captureBtn" style="display: none;">📸 Capture Image</button>
 
   <script>
-    const startBtn = document.getElementById('startBtn');
-    const captureBtn = document.getElementById('captureBtn');
     const video = document.getElementById('video');
-    const cameraContainer = document.getElementById('cameraContainer');
     const canvas = document.getElementById('snapshot');
-    const ctx = canvas.getContext('2d');
+    const openCameraBtn = document.getElementById('openCameraBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const infoText = document.getElementById('infoText');
     let videoStream;
 
-    startBtn.addEventListener('click', async () => {
-      cameraContainer.style.display = 'block';
-      captureBtn.style.display = 'none';  // Hide capture button initially
-
+    openCameraBtn.addEventListener('click', async () => {
       try {
-        // Try to open back camera
+        // Open back camera if possible
         videoStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" }
         });
-      } catch (e) {
-        console.warn('Back camera not found, using default camera.', e);
-        // fallback to any camera
-        videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
-      }
-
-      video.srcObject = videoStream;
-
-      // Show capture button only after stream starts
-      video.onloadedmetadata = () => {
+        video.srcObject = videoStream;
+        video.style.display = 'block';
+        canvas.style.display = 'none';
+        infoText.style.display = 'none';
         captureBtn.style.display = 'inline-block';
-      };
+      } catch (err) {
+        alert("Could not access the camera: " + err.message);
+      }
     });
 
     captureBtn.addEventListener('click', () => {
       canvas.style.display = 'block';
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      video.style.display = 'none';
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
     });
   </script>
 
