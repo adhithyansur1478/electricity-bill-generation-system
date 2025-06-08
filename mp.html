@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electricity Bill Scanner</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #e8f5e9, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    h1 {
+      color: #2e7d32;
+      margin-bottom: 20px;
+    }
+
+    .camera-container {
+      display: none;
+      margin-top: 20px;
+      border: 4px solid #2e7d32;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    video {
+      width: 100%;
+      height: auto;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      background-color: #43a047;
+      color: white;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .btn:hover {
+      background-color: #2e7d32;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Electricity Bill Scanner</h1>
+  <button class="btn" onclick="openCamera()">📷 Scan Meter</button>
+
+  <div class="camera-container" id="cameraContainer">
+    <video id="camera" autoplay playsinline></video>
+  </div>
+
+  <script>
+    async function openCamera() {
+      const video = document.getElementById('camera');
+      const container = document.getElementById('cameraContainer');
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        container.style.display = 'block';
+      } catch (err) {
+        alert('Camera access denied or not available.');
+        console.error(err);
+      }
+    }
+  </script>
+
+</body>
+</html>
